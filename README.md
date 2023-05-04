@@ -1,4 +1,4 @@
-# Om Quant lib
+# OM Quant lib
 
 OM Quant is a simple Python library for quantitative trading analysis. It provides functionality for downloading stock data, calculating various indicators, and running a logistic regression model with AUC and Gini metrics for model evaluation.
 
