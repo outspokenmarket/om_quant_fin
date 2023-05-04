@@ -22,6 +22,7 @@ om_quant/                   # Diretório raiz do projeto
 - Calculate returns
 - Split data into training and test sets
 - Run a logistic regression model
+- Evaluates the model with AUC and Gini
 
 ## Installation
 
