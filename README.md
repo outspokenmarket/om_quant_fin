@@ -28,13 +28,15 @@ om_quant_fin/                   # Diretório raiz do projeto
 
 Install the library using pip:
 
-  pip install om_quant_fin
+```python
+pip install om_quant_fin
+```
 
 ## Usage
 
 ```python
-  import om_quant_fin as mql
-  import om_quant_fin as mql
+import om_quant_fin as mql
+import om_quant_fin as mql
 
 #Download stock data:
   data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
