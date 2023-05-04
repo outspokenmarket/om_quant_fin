@@ -59,5 +59,3 @@ import om_quant_fin as mql
 ## License
 
 This project is licensed under the MIT License.
-
-This markdown file provides an overview of your project, its structure, features, installation, and usage instructions. It's a good starting point for users who want to learn about your library and how to use it. You can also include additional information, such as code examples, detailed explanations of the functions, and any other relevant information that you'd like to share.
