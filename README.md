@@ -5,13 +5,13 @@ OM Quant is a simple Python library for quantitative trading analysis. It provid
 ## Project Structure
 
 ```python
-om_quant_fin/                   # Diretório raiz do projeto
-├── om_quant_fin/              # Python package
-│   ├── __init__.py         # Marca o diretório como um package
-│   └── om_quant_fin.py         # Contém as funções da sua lib
-├── setup.py                # Fornece os metadados do package bem como suas dependências
-├── .gitignore              # Lista os arquivos e pastas que não precisam ser registradas no git
-└── README.md               # Arquivo Markdown com a descrição do projeto, exemplos e outras informações
+om_quant_fin/               # Root directory of the project
+├── om_quant_fin/           # Python package containing the library's code
+│   ├── __init__.py         # Marks the directory as a package and can contain package-level code or imports
+│   └── om_quant_fin.py     # Contains library's functions
+├── setup.py                # Provides package metadata and dependencies for packaging and distribution
+├── .gitignore              # Lists files and folders that should not be tracked by Git
+└── README.md               # Markdown file with a description of the project, usage instructions, and other information
 ```
 
 ## Features
@@ -36,6 +36,7 @@ pip install om_quant_fin
 
 ```python
 import om_quant_fin as mql
+
 
 #Download stock data:
   data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
