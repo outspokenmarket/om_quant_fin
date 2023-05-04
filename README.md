@@ -4,6 +4,7 @@ My Quant Lib is a simple Python library for quantitative trading analysis. It pr
 
 ## Project Structure
 
+```python
 om_quant/                   # Diretório raiz do projeto
 ├── om_quant /              # Python package
 │   ├── __init__.py         # Marca o diretório como um package
@@ -11,7 +12,7 @@ om_quant/                   # Diretório raiz do projeto
 ├── setup.py                # Fornece os metadados do package bem como suas dependências
 ├── .gitignore              # Lista os arquivos e pastas que não precisam ser registradas no git
 └── README.md               # Arquivo Markdown com a descrição do projeto, exemplos e outras informações
-
+```
 
 ## Features
 
@@ -30,6 +31,7 @@ Install the library using pip:
 
 ## Usage
 
+```python
   import my_quant_lib as mql
   import my_quant_lib as mql
 
@@ -51,6 +53,7 @@ Install the library using pip:
 #Run a logistic regression model:
   predictions = mql.run_logistic_regression(X_train, y_train, X_test)
 
+```
 ## License
 
 This project is licensed under the MIT License.
