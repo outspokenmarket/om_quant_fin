@@ -1,6 +1,6 @@
-# OM Quant lib
+# OM Quant Fin
 
-OM Quant is a simple Python library for quantitative trading analysis. It provides functionality for downloading stock data, calculating various indicators, and running a logistic regression model with AUC and Gini metrics for model evaluation.
+OM Quant Fin is a simple Python library for quantitative trading analysis. It provides functionality for downloading stock data, calculating various indicators, and running a logistic regression model with AUC and Gini metrics for model evaluation.
 
 ## Project Structure
 
@@ -36,7 +36,6 @@ pip install om_quant_fin
 
 ```python
 import om_quant_fin as mql
-
 
 #Download stock data:
   data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
