@@ -26,30 +26,30 @@ om_quant/                   # Diretório raiz do projeto
 
 Install the library using pip:
 
-pip install om_quant
+  pip install om_quant
 
 ## Usage
 
-import my_quant_lib as mql
-import my_quant_lib as mql
+  import my_quant_lib as mql
+  import my_quant_lib as mql
 
 #Download stock data:
-data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
+  data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
 
 #Calculate rolling Z-score:
-z_score = mql.rolling_z_score(data["Adj Close"], window=20)
+  z_score = mql.rolling_z_score(data["Adj Close"], window=20)
 
 #Calculate rolling ratio:
-ratio = mql.rolling_ratio(data["Adj Close"], window=20)
+  ratio = mql.rolling_ratio(data["Adj Close"], window=20)
 
 #Calculate returns:
-returns = mql.calculate_returns(data["Adj Close"])
+  returns = mql.calculate_returns(data["Adj Close"])
 
 #Split data into training and test sets:
-train, test = mql.split_data(data, "2020-01-01", "2021-12-31", "2022-01-01", "2022-12-31")
+  train, test = mql.split_data(data, "2020-01-01", "2021-12-31", "2022-01-01", "2022-12-31")
 
 #Run a logistic regression model:
-predictions = mql.run_logistic_regression(X_train, y_train, X_test)
+  predictions = mql.run_logistic_regression(X_train, y_train, X_test)
 
 ## License
 
