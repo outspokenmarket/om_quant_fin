@@ -14,7 +14,7 @@ om_quant_fin/               # Root directory of the project
 └── README.md               # Markdown file with a description of the project, usage instructions, and other information
 ```
 
-## What's new in version 1.0.0
+## What's new in version 1.0.1
 
 - OM Quant Fin is now beta!
 - Pain Index - by Dr. Thomas Becker and Aaron Moore of Zephyr Associates
