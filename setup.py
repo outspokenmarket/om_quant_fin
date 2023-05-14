@@ -9,22 +9,25 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setup(
-    name = "om_quant",
-    version = "0.2.0",
+    name = "om_quant_fin",
+    version = "1.0.0",
     packages = find_packages(),
     install_requires = [
         "yfinance",
         "pandas",
         "scikit-learn",
-        "numpy"
+        "numpy",
+        "time",
+        "sys",
+        "plotly"
     ],
     author = "Outspoken Market",
     author_email = "info@outspokenmarket.com",
-    description = "A simple quantitative trading library for the OMNP Class",
+    description = "A modern Python library for quantitative trading analysis. Our mission is to make your quant life easier and more accurate.",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
@@ -32,3 +35,4 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
 )
+
