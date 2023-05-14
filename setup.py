@@ -10,7 +10,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = "om_quant_fin",
-    version = "1.0.0",
+    version = "1.0.1",
     packages = find_packages(),
     install_requires = [
         "yfinance",
