@@ -1,6 +1,6 @@
 # OM Quant Fin
 
-OM Quant Fin is a modern Python library for quantitative trading analysis. Our mission is to make your quant life easier and more accurate.
+The Outspoken Market is training the next quantitative generation. OM Quant Fin is a modern Python package for quantitative trading analysis. Our mission is to make your quant life easier and more accurate.
 
 ## Project Structure
 
@@ -14,29 +14,29 @@ om_quant_fin/               # Root directory of the project
 └── README.md               # Markdown file with a description of the project, usage instructions, and other information
 ```
 
-## What's new in version 1.0.1
+## What's new in version 1.1.0
 
-- OM Quant Fin is now beta!
-- Pain Index - by Dr. Thomas Becker and Aaron Moore of Zephyr Associates
-- Bootstrapping methodology for model robustness evaluation
-- Plot funcions for the Pain Index and Bootstrapping
-- QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
-    - This is a fit and transform for the qcut method!
-    - This transformer performs quantile-based discretization on the input data.
-    - The constructor function initializes the transformer with the number of quantiles (default is 10)
-    and optional labels for the bins.
-- Removal of the logistic regression model; the package will focus on attributes, indicators and relevant metrics
-    - for modelling please use the very well known Python packages
+- OM Quant Fin now introduces the iFat! The iFat is a fantastic indicator for the measurement of the presence of fat tails. The closest to 0, fatter are the tails. Thin tails otherwise.
+- You also have a new function that create 27 attributes optimizide for the volatility estimation of any give asset. Apply the model methodology of choice into this attributes, evaluate it with the "regression_metrics" method and forecast the volatility with the "prediction_report" method.
 
-## Features
+## OM Quant Fin Features
 
 - Download stock data from Yahoo Finance
-- Calculate rolling Z-scores
-- Calculate rolling ratio of adjusted close and its mean
-- Evaluates the model with AUC and Gini for classification models and respective plots
-- QCut fit method for proper binning in unseen data
+- Calculates rolling Z-scores
+- Calculates the rolling ratio of adjusted close and its mean (RSL indicator)
+- Evaluates a model with AUC and Gini for classification models and respective plots
+- QCut fit method for the proper binning of unseen data
 - Robustness test with bootstrapping
-- Calculate the Pain Index that is a measure of portfolio risk that takes into account both the depth and duration of drawdowns
+- Calculates the Pain Index which is a measure of portfolio risk that takes into account both the depth and duration of drawdowns
+- Calculates the first ACF component for a given time series
+- Z-score function only (no rolling)
+- Z-score based on the median
+- Function to find the next business day given an input date
+- Mean Standard Deviation (MAD) Python implementation
+- iFat: fat tail index calculation
+- Function to create a data frame with 27 attributes for volatility estimation
+- Generates a report with main regression metrics: RMSE and MAE
+- Generates a report with predicted value and actions to take for a given volatility model
 
 ## Installation
 
@@ -54,13 +54,13 @@ import om_quant_fin as mql
 #Download stock data:
   data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
 
-#Calculate rolling Z-score:
+#Calculates rolling Z-score:
   z_score = mql.rolling_z_score(data["Adj Close"], window = 20)
 
-#Calculate rolling ratio:
+#Calculates rolling ratio:
   ratio = mql.rolling_ratio(data["Adj Close"], window = 20)
 
-#Calculate returns:
+#Calculates returns:
   returns = mql.calculate_returns(data["Adj Close"], period = 1)
 
 #Pain index
@@ -79,7 +79,24 @@ labels = ["bin1", "bin2", "bin3", "bin4", "bin5", "bin6", "bin7", "bin8", "bin9"
 qcut_transformer = mql.QCutTransformer(q = 20, labels = labels)
 qcut_transformer.fit(data["column"])
 qcut_transformer.transform(data["column"])
+
+#Creates a data frame with 27 attributes for volatility estimation
+start_date = = "2015-01-01" 
+end_date = "2023-12-31"
+data = create_vars("^VIX", start_date, end_date, p = 10):
+data.head(5)
+
+#Creates a data frame with 27 attributes for volatility estimation
+start_date = = "2015-01-01" 
+end_date = "2023-12-31"
+data = create_vars("^VIX", start_date, end_date, p = 10):
+data.head(5)
+
+#Calculates the iFat
+ifat, mstd = ifat(data["Returns"], p = 67)
+
 ```
+
 ## License
 
 This project is licensed under the MIT License.
