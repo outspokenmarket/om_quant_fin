@@ -1,15 +1,21 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from numpy import mean, absolute
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_curve, roc_auc_score, auc, accuracy_score
+from sklearn.metrics import roc_curve, roc_auc_score, auc, accuracy_score, mean_squared_error, mean_absolute_error
 from sklearn.utils import resample
 from sklearn.base import BaseEstimator, TransformerMixin
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from statsmodels.tsa.stattools import pacf, acf
+from numpy_ext import rolling_apply as rolling_apply_ext
+from datetime import datetime, timedelta  
 from time import sleep
 import sys
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def download_data(ticker, start_date, end_date):
@@ -348,3 +354,219 @@ class QCutTransformer(BaseEstimator, TransformerMixin):
 
         # We use pandas" cut function to bin the data using the extended bin edges and labels.
         return pd.cut(X, bins = extended_bins, labels = extended_labels, include_lowest = True, duplicates = "drop")
+
+def get_acf1(x):
+    """Gets the first ACF component for a given time series
+        
+        Args:
+            x (DataFrame column): time series
+            
+        Returns:
+            first ACF component for a given time series
+            """
+    return acf(x, alpha = 0.05, nlags = 5)[0][1]
+
+def z_score(x):
+    """Calculates a traditional normalization with z-score
+        
+        Args:
+            x (DataFrame column): time series
+            
+        Returns:
+            Normalized z-score serie
+        """
+    return ((x - x.mean())/np.std(x))[-1]
+
+def next_business_day(date):
+    """Given a a date, it returns the next business day
+        
+        Args:
+            date (string): date in the string format
+            
+        Returns:
+            Next business day
+        """
+    if isinstance(date, str):
+        date = pd.to_datetime(date)
+    business_days = pd.date_range(start=date, end=date + pd.DateOffset(weeks=1), freq = "B")
+
+    return business_days.min()
+
+def z_score_med(x):
+    """Calculate the  z-score with a median
+    
+    Args:
+        data (Series): Input data.
+        
+    Returns:
+        Series: z-score calculated with the median
+    """
+    return ((x - x.median())/np.std(x))[-1]
+
+def create_vars(ticker1, start_date, end_date, p = 10):
+    """Creates a dataframe with a generic set of variables for volatility forecasting
+    
+    Args:
+        ticker1 (string): ticker name from Yahoo Finance
+        start_date (string): start date for the data collection
+        end_date (string): end date for the data collection
+        p (integer): value of the periods for the volatility forecasting; 10 is the default
+        
+    Returns:
+        df: dataframe with all variables and target
+        forecast_df: dataframe with the last p observations
+        last_vol: last volatility measuread in the p periods
+        today_vol: last volatility from the dataframe
+
+    """
+    # Get the data
+    df1 = download_data(ticker1, start_date, end_date)
+    df1["Returns"] = df1["Adj Close"].pct_change(1)
+    df1["Vol"] = np.round(df1["Returns"].rolling(20).std()*np.sqrt(252)*100, 3)
+    df1.dropna(axis = 0, inplace = True) 
+
+    # Some generic vars - users are welcome to create new ones
+    df1["f1"] = rolling_apply_ext(get_acf1, 20, df1["Returns"])
+    df1["f2"] = rolling_apply_ext(z_score, 10, df1["Returns"])
+
+    df1["f3"] = df1["Adj Close"]/df1["Adj Close"].rolling(5).mean()-1
+    df1["f4"] = df1["Adj Close"]/df1["Adj Close"].rolling(10).mean()-1
+    df1["f5"] = df1["Adj Close"]/df1["Adj Close"].rolling(20).mean()-1
+    df1["f6"] = df1["Adj Close"]/df1["Adj Close"].rolling(52).mean()-1
+
+    df1["f7"] = df1["Returns"].rolling(5).std()
+    df1["f8"] = df1["Returns"].rolling(10).std()
+    df1["f9"] = df1["Returns"].rolling(20).std()
+    df1["f10"] = df1["Returns"].rolling(52).std()
+
+    df1["f11"] = df1["Returns"].shift(1)
+    df1["f12"] = df1["Returns"].shift(2)
+    df1["f13"] = df1["Returns"].shift(3)
+    df1["f14"] = df1["Returns"].shift(4)
+    df1["f15"] = df1["Returns"].shift(5)
+
+    df1["f16"] = df1["Adj Close"]/df1["MA200"]-1
+    df1["f_Z16"] = rolling_apply_ext(z_score_med, 200, df1["f16"])
+    df1["f_Z16"] = np.where((df1["f_Z16"] > 2), 2
+                     , np.where(df1["f_Z16"] <-2, -2, df1["f_Z16"]))
+
+    df1["f17"] = df1["Vol"].shift(1)
+    df1["f18"] = df1["Vol"].shift(2)
+    df1["f19"] = df1["Vol"].shift(3)
+    df1["f20"] = df1["Vol"].shift(4)
+    df1["f21"] = df1["Vol"].shift(5)
+    df1["f22"] = df1["Vol"].shift(6)
+    df1["f23"] = df1["Vol"].shift(7)
+    df1["f24"] = df1["Vol"].shift(8)
+    df1["f25"] = df1["Vol"].shift(9)
+    df1["f26"] = df1["Vol"].shift(10)
+
+    # Calculate drawdown
+    df1["Drawdown"] = (1 + df1["Returns"]).cumprod() - 1
+
+    # Calculate moving drawdowns for specified windows
+    windows = [15, 20, 30, 52]
+    for window in windows:
+        df1[f"DD_{window}d"] = df1["Drawdown"].rolling(window=window).min()
+
+
+    df1["f27"] = rolling_apply_ext(z_score, 200, df1["Adj Close"].rolling(20).apply(pain_index, raw = True))
+
+    forecast_df = df1.iloc[(-1-p):].copy()
+    last_vol = df1["Vol"].iloc[(-1-p):-p]
+    today_vol = df1["Vol"][-1]
+
+    # Target: volatility p days ahead
+    df1["Target1"] = df1["Vol"].shift(-p)
+    df1.dropna(inplace = True)
+
+    return df1, forecast_df, last_vol, today_vol
+
+def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10):
+    """Generates a simple report with main regression metrics: RMSE and MAE
+    
+    Args:
+        model (regression model object): fitted regression model
+        x_train (DataFrame): dataframe with the training set
+        x_test (DataFrame): dataframe with the testing set
+        y_train (DataFrame): dataframe with the target variable from the training set
+        y_test (DataFrame): dataframe with the target variable from the testing set
+        stability (float): stability cut-off for the MAE
+        
+    Returns:
+        Regression metrics report
+
+    """
+
+    # Generate predictions for both training and testing sets
+    y_train_pred = model.predict(x_train)
+    y_test_pred = model.predict(x_test)
+
+    # Calculate MAE for the training set
+    mae_train = np.round(mean_absolute_error(y_train, y_train_pred), 2)
+    print(f"Training Set MAE: {mae_train}")
+
+    # Calculate MAE for the testing set
+    mae_test = np.round(mean_absolute_error(y_test, y_test_pred), 2)
+    print(f"Testing Set MAE: {mae_test}")
+    print("-"*70)
+    print("")
+    if np.abs(mae_test-mae_train) < mae_train*stability:
+        print("Model is stable according to MAE")
+    else:
+        print("Model is not stable according to MAE")
+
+def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
+    """Generates a report with predicted value and actions to take for a given volatility model
+    
+    Args:
+        model (model object): fitted regression model
+        ticker1 (string): Yahoo Finance ticker
+        forecast_df (DataFrame): dataframe to forecast the volatility
+        last_vol (float): last predicted volatility
+        today_vol (float): today measured volatility
+        p (integer): period for the prediction
+        
+    Returns:
+        Regression metrics report
+
+    """
+    print("-"*70)
+    print("Last volatility measured before a prediction on the day " + str(forecast_df.index[0].strftime("%Y-%m-%d")))
+    print("%.2f" % last_vol)
+    print("Predicted volatility for " + ticker1 + " on that day was")
+    print("%.2f" % (model.predict(forecast_df[vars].iloc[(-1-p):-p].values.reshape(1, -1))[0]))
+    
+    print("Volatility today " + str(datetime.today().strftime("%Y-%m-%d")))
+    print("%.2f" % today_vol)
+    print("-"*70)
+    print("")
+    print("-"*70)
+    print("Next volatility prediction for " + ticker1 + " on the day " + str(next_business_day((datetime.today() + timedelta(days = p))).strftime("%Y-%m-%d")))
+    print("%.2f" % (model.predict(forecast_df[vars].iloc[-1].values.reshape(1, -1))[0]))
+    print("-"*70)
+
+def mad_calc(data, axis = None):
+    """Calculates the Mean Absolute Deviation - MAD
+    
+    Args:
+        data (list or data frame column): series for MAD's calculation
+        
+    Returns:
+        Mean Absolute Deviation
+    """
+    return mean(absolute(data - mean(data, axis)), axis)
+
+def ifat(returns, p = 67):
+    """Calculates the iFat - Fata Tail Index for indentification of fat tails
+    
+    Args:
+        returns (data frame column): asset returns
+        
+    Returns:
+        The iFat and it's moving standard deviation(mstd)
+    """
+    p = p
+    ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
+    mstd = ifat.rolling(20).mean() - ifat.rolling(252*2).std()
+    return ifat, mstd
