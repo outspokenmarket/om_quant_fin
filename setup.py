@@ -10,7 +10,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name = "om_quant_fin",
-    version = "1.0.1",
+    version = "1.1.0",
     packages = find_packages(),
     install_requires = [
         "yfinance",
@@ -19,11 +19,15 @@ setup(
         "numpy",
         "time",
         "sys",
-        "plotly"
+        "plotly",
+        "statsmodels.tsa.stattools",
+        "numpy_ext",
+        "warnings",
+        "datetime"
     ],
     author = "Outspoken Market",
     author_email = "info@outspokenmarket.com",
-    description = "A modern Python library for quantitative trading analysis. Our mission is to make your quant life easier and more accurate.",
+    description = "The Outspoken Market is training the next quantitative generation. OM Quant Fin is a modern Python package for quantitative trading analysis. Our mission is to make your quant life easier and more accurate.",
     long_description = long_description,
     long_description_content_type = 'text/markdown',
     classifiers = [
