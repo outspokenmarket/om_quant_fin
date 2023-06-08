@@ -1,5 +1,6 @@
 from .om_quant_fin import (
     download_data,
+    get_bitstamp_data,
     rolling_z_score,
     rolling_ratio,
     calculate_returns,

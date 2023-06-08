@@ -22,6 +22,7 @@ om_quant_fin/               # Root directory of the project
 ## OM Quant Fin Features
 
 - Download stock data from Yahoo Finance
+- Download crypto data from the Bitstamp API for a specified crypto.
 - Calculates rolling Z-scores
 - Calculates the rolling ratio of adjusted close and its mean (RSL indicator)
 - Evaluates a model with AUC and Gini for classification models and respective plots
@@ -53,6 +54,9 @@ import om_quant_fin as mql
 
 #Download stock data:
   data = mql.download_data("AAPL", "2020-01-01", "2022-12-31")
+  
+#Download crypto data:
+  data = mql.get_bitstamp_data(currency_pair = "btcusd", start = "01-01-2011")
 
 #Calculates rolling Z-score:
   z_score = mql.rolling_z_score(data["Adj Close"], window = 20)
