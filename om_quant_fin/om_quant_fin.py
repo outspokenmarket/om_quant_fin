@@ -570,3 +570,5 @@ def ifat(returns, p = 67):
     ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
     mstd = ifat.rolling(20).mean() - ifat.rolling(252*2).std()
     return ifat, mstd
+
+#
