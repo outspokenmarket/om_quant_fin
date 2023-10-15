@@ -60,7 +60,7 @@ def moving_std(data, window = 20):
     
     return data.rolling(window).std()
 
-def moving_median(value_series, periods = 20):
+def moving_median(data, window = 20):
     """
     Method to calculate moving median from a series of values.
     
@@ -72,7 +72,7 @@ def moving_median(value_series, periods = 20):
         Series: Calculated moving standard median.
     """
     
-    return value_series.rolling(periods).median()
+    return data.rolling(window).median()
 
 def rolling_z_score(data, window):
     """
@@ -85,12 +85,16 @@ def rolling_z_score(data, window):
     Returns:
         Series: Rolling Z-score.
     """
-    mean = simple_moving_average(data, window)
 
-    
-    std_dev = data.rolling(window = window).std()
-    z_score = (data - mean) / std_dev
-    return z_score
+    sma = simple_moving_average(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_sma = data - sma
+
+    return distance_price_sma / moving_std_dev
 
 
 def rolling_ratio(data, window):
