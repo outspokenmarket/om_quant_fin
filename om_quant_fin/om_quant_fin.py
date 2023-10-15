@@ -32,13 +32,13 @@ def download_data(ticker, start_date, end_date):
     stock_data = yf.download(ticker, start = start_date, end = end_date)
     return stock_data
 
-def simple_moving_average(data, window = 20):
+def simple_moving_average(data, window):
     """
     Method to calculate SMA (Simple Moving Average) from a series of values.
     
     Args:
         data (Series): Input data.
-        window (int): Rolling window size (default 20).
+        window (int): Rolling window size.
 
     Returns:
         Series: Calculated moving average.
@@ -46,13 +46,13 @@ def simple_moving_average(data, window = 20):
     
     return data.rolling(window).mean()
 
-def moving_std(data, window = 20):
+def moving_std(data, window):
     """
     Method to calculate moving standard deviation from a series of values.
     
     Args:
         data (Series): Input data.
-        window (int): Rolling window size (default 20).
+        window (int): Rolling window size.
 
     Returns:
         Series: Calculated moving standard deviation.
@@ -60,13 +60,13 @@ def moving_std(data, window = 20):
     
     return data.rolling(window).std()
 
-def moving_median(data, window = 20):
+def moving_median(data, window):
     """
     Method to calculate moving median from a series of values.
     
     Args:
         data (Series): Input data.
-        window (int): Rolling window size (default 20).
+        window (int): Rolling window size.
 
     Returns:
         Series: Calculated moving standard median.
@@ -95,6 +95,30 @@ def rolling_z_score(data, window):
     distance_price_sma = data - sma
 
     return distance_price_sma / moving_std_dev
+
+def rolling_median_z_score(data, window):
+    """
+    Calculate the rolling median Z-score.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Rolling median Z-score.
+    """
+    
+    mm = moving_median(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_mm = data - mm
+
+    return distance_price_mm / moving_std_dev
+
+
 
 
 def rolling_ratio(data, window):
