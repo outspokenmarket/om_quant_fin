@@ -19,7 +19,8 @@ warnings.filterwarnings("ignore")
 
 
 def download_data(ticker, start_date, end_date):
-    """Download stock data from Yahoo Finance.
+    """
+    Download stock data from Yahoo Finance.
     
     Args:
         ticker (str): Stock symbol.
@@ -36,6 +37,8 @@ def simple_moving_average(data, window):
     """
     Method to calculate SMA (Simple Moving Average) from a series of values.
     
+    The Series must be ordered from oldest date to newest date.
+
     Args:
         data (Series): Input data.
         window (int): Rolling window size.
@@ -50,6 +53,8 @@ def moving_std(data, window):
     """
     Method to calculate moving standard deviation from a series of values.
     
+    The Series must be ordered from oldest date to newest date.
+
     Args:
         data (Series): Input data.
         window (int): Rolling window size.
@@ -64,6 +69,8 @@ def moving_median(data, window):
     """
     Method to calculate moving median from a series of values.
     
+    The Series must be ordered from oldest date to newest date.
+
     Args:
         data (Series): Input data.
         window (int): Rolling window size.
@@ -77,6 +84,8 @@ def moving_median(data, window):
 def rolling_z_score(data, window):
     """
     Calculate the rolling Z-score.
+    
+    The Series must be ordered from oldest date to newest date.
     
     Args:
         data (Series): Input data.
@@ -100,6 +109,8 @@ def rolling_median_z_score(data, window):
     """
     Calculate the rolling median Z-score.
     
+    The Series must be ordered from oldest date to newest date.
+    
     Args:
         data (Series): Input data.
         window (int): Rolling window size.
@@ -118,11 +129,9 @@ def rolling_median_z_score(data, window):
 
     return distance_price_mm / moving_std_dev
 
-
-
-
 def rolling_ratio(data, window):
-    """Calculate the rolling ratio of data and its mean.
+    """
+    Calculate the rolling ratio of data and its mean.
     
     Args:
         data (Series): Input data.
@@ -135,13 +144,13 @@ def rolling_ratio(data, window):
     ratio = np.round((data / mean - 1), 3)*100
     return ratio
 
-
 def calculate_returns(data, period = 1):
-    """Calculate returns from price data.
+    """
+    Calculate returns from price data.
     
     Args:
         data (Series): Input price data.
-        period (Integer): number of periods; 1 as default
+        period (Integer): number of periods (default is 1).
         
     Returns:
         Series: Returns.
@@ -149,9 +158,9 @@ def calculate_returns(data, period = 1):
     returns = data.pct_change(period)
     return returns
 
-
 def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
-    """Calculate and plot the AUC for given true labels and predictions.
+    """
+    Calculate and plot the AUC for given true labels and predictions.
     
     Args:
         y_true (Series): True labels.
@@ -185,9 +194,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
     
     return roc_auc
 
-
 def calculate_gini(auc_score):
-    """Calculate the Gini coefficient based on the AUC.
+    """
+    Calculate the Gini coefficient based on the AUC.
     
     Args:
         auc_score (float): AUC value.
@@ -198,16 +207,16 @@ def calculate_gini(auc_score):
     gini = 2 * auc_score - 1
     return gini
 
-
 def pain_index(prices_series, freq = 252):
-    """Calculate the Pain Index for a given price series
+    """
+    Calculate the Pain Index for a given price series.
     
     Args:
-        prices_series (float): Price series
-        freq (integer): frequency for the pain index estimation
+        prices_series (float): Price series.
+        freq (integer): frequency for the pain index estimation.
         
     Returns:
-        float: Pain index
+        float: Pain index.
     """
 
     # Calculate drawdowns
@@ -229,18 +238,18 @@ def pain_index(prices_series, freq = 252):
 
     return pain_index
 
-
 def plot_pain_index(ticker, index, close, pain_index):
-    """Plot the Pain Index and the price series for the given tickers
+    """
+    Plot the Pain Index and the price series for the given tickers.
     
     Args:
-        ticker (string): Ticker symbol from Yahoo finance
-        index (datetime): index from the main data frame in a date time format
-        close (data frame column): price series
-        pain_index (data frame column): the pain index
+        ticker (string): Ticker symbol from Yahoo finance.
+        index (datetime): index from the main data frame in a date time format.
+        close (data frame column): price series.
+        pain_index (data frame column): the pain index.
         
     Returns:
-        float: Pain index
+        float: Pain index.
     """
 
     fig = make_subplots(rows = 2, cols = 1
@@ -283,21 +292,21 @@ def plot_pain_index(ticker, index, close, pain_index):
     )
     return fig.show()
 
-
 def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range_bs = 0.1):
-    """Calculates a bootstrapping simulation for model accuracy
+    """
+    Calculates a bootstrapping simulation for model accuracy.
     
     Args:
-        model (model object): configured classification model
-        X_train (DataFrame): training features
-        y_train (DataFrame): training target
-        X_test (DataFrame): testing features
-        y_test (DataFrame): testing target
-        n_iterations (integer): number of interations for the BS calculation; 1000 is default
-        range (float): percentage of the mean for robustness validation
+        model (model object): configured classification model.
+        X_train (DataFrame): training features.
+        y_train (DataFrame): training target.
+        X_test (DataFrame): testing features.
+        y_test (DataFrame): testing target.
+        n_iterations (integer): number of interations for the BS calculation (default is 1000).
+        range (float): percentage of the mean for robustness validation.
         
     Returns:
-        DataFrame: with accuracies for y_train and y_test
+        DataFrame: with accuracies for y_train and y_test.
     """
     n_iterations = n_iterations
     accuracy_df = pd.DataFrame()
@@ -355,15 +364,15 @@ def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range
     
     return accuracy_df
 
-
 def plot_bs(metric_bs):
-    """Plot the distribution of accuracies from the bootstrapping simulation
+    """
+    Plot the distribution of accuracies from the bootstrapping simulation.
     
     Args:
-        metric_bs (DataFrame): data frame from the model_bs function
+        metric_bs (DataFrame): data frame from the model_bs function.
         
     Returns:
-        histogram with the distribution of the metric of choice
+        histogram with the distribution of the metric of choice.
     """
     fig = go.Figure(data = [go.Histogram(x = metric_bs)])
     fig.update_layout(
@@ -373,47 +382,61 @@ def plot_bs(metric_bs):
         )
     fig.show()
 
-
 class QCutTransformer(BaseEstimator, TransformerMixin):
-    """QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
+    """
+    QCutTransformer is a custom transformer class that extends the BaseEstimator and 
+    TransformerMixin classes from sklearn.
+
     This transformer performs quantile-based discretization on the input data.
-    The constructor function initializes the transformer with the number of quantiles (default is 10)
-    and optional labels for the bins.
+
+    The constructor function initializes the transformer with the number of 
+    quantiles (default is 10) and optional labels for the bins.
     """
     def __init__(self, q = 10, labels = None):
-        """Init for the QCurTransformer class
+        """
+        Init for the QCurTransformer class.
     
         Args:
-            q (integer): number of bins; default is 10
-            labels (string list): list with the labels in the same lenght of q    
+            q (integer): number of bins (default is 10).
+            labels (string list): list with the labels in the same lenght of q.   
         """
         self.q = q  # Number of quantiles
         self.labels = labels  # Labels for the bins
         self.bins = None  # Will hold the bin edges after fit is called
 
     def fit(self, X, y = None):
-        """Calculates the bin edges using pandas" qcut function
-        The `retbins` parameter is set to True so that qcut returns the bin edges in addition to the binned data.
+        """
+        Calculates the bin edges using pandas" qcut function.
+
+        The `retbins` parameter is set to True so that qcut returns the bin edges in 
+        addition to the binned data.
     
         Args:
-            q (integer): number of bins
-            labels (string list): list with the labels in the same lenght of q    
+            q (integer): number of bins.
+            labels (string list): list with the labels in the same lenght of q  .  
         """
         _, self.bins = pd.qcut(X, q = self.q, retbins = True, duplicates="drop")
         
         return self
 
     def transform(self, X, y = None):
-        """The transform function bins the input data using the bin edges calculated in fit.
-        If labels were provided, they are used to label the bins; otherwise, the bins are labeled with their numeric range.
-        We add -inf and inf to the bin edges to ensure that all data points are included in a bin.
-        If labels were provided, we add "below" and "above" labels for the -inf and inf bins.
+        """
+        The transform function bins the input data using the bin edges calculated in fit.
+        
+        If labels were provided, they are used to label the bins; otherwise, the bins 
+        are labeled with their numeric range.
+
+        We add -inf and inf to the bin edges to ensure that all data points are included 
+        in a bin.
+
+        If labels were provided, we add "below" and "above" labels for the -inf and inf 
+        bins.
         
         Args:
-            X (DataFrame column): values to be binned
+            X (DataFrame column): values to be binned.
             
         Returns:
-            the bins values of the input data
+            the bins values of the input data.
         """
         
         extended_bins = np.hstack([[-np.inf], self.bins, [np.inf]])
@@ -428,36 +451,42 @@ class QCutTransformer(BaseEstimator, TransformerMixin):
         return pd.cut(X, bins = extended_bins, labels = extended_labels, include_lowest = True, duplicates = "drop")
 
 def get_acf1(x):
-    """Gets the first ACF component for a given time series
+    """
+    Gets the first ACF component for a given time series.
         
-        Args:
-            x (DataFrame column): time series
-            
-        Returns:
-            first ACF component for a given time series
-            """
+    Args:
+        x (DataFrame column): time series.
+        
+    Returns:
+        first ACF component for a given time series.
+    """
+
     return acf(x, alpha = 0.05, nlags = 5)[0][1]
 
 def z_score(x):
-    """Calculates a traditional normalization with z-score
+    """
+    Calculates a traditional normalization with z-score.
+    
+    Args:
+        x (DataFrame column): time series.
         
-        Args:
-            x (DataFrame column): time series
-            
-        Returns:
-            Normalized z-score serie
-        """
+    Returns:
+        Normalized z-score serie.
+    """
+
     return ((x - x.mean())/np.std(x))[-1]
 
 def next_business_day(date):
-    """Given a a date, it returns the next business day
+    """
+    Given a a date, it returns the next business day.
         
-        Args:
-            date (string): date in the string format
-            
-        Returns:
-            Next business day
-        """
+    Args:
+        date (string): date in the string format.
+        
+    Returns:
+        Next business day.
+    """
+
     if isinstance(date, str):
         date = pd.to_datetime(date)
     business_days = pd.date_range(start=date, end=date + pd.DateOffset(weeks=1), freq = "B")
@@ -465,31 +494,32 @@ def next_business_day(date):
     return business_days.min()
 
 def z_score_med(x):
-    """Calculate the  z-score with a median
+    """
+    Calculate the  z-score with a median.
     
     Args:
         data (Series): Input data.
         
     Returns:
-        Series: z-score calculated with the median
+        Series: z-score calculated with the median.
     """
     return ((x - x.median())/np.std(x))[-1]
 
 def create_vars(ticker1, start_date, end_date, p = 10):
-    """Creates a dataframe with a generic set of variables for volatility forecasting
+    """
+    Creates a dataframe with a generic set of variables for volatility forecasting.
     
     Args:
-        ticker1 (string): ticker name from Yahoo Finance
-        start_date (string): start date for the data collection
-        end_date (string): end date for the data collection
-        p (integer): value of the periods for the volatility forecasting; 10 is the default
+        ticker1 (string): ticker name from Yahoo Finance.
+        start_date (string): start date for the data collection.
+        end_date (string): end date for the data collection.
+        p (integer): value of the periods for the volatility forecasting (default is 10).
         
     Returns:
-        df: dataframe with all variables and target
-        forecast_df: dataframe with the last p observations
-        last_vol: last volatility measuread in the p periods
-        today_vol: last volatility from the dataframe
-
+        df: dataframe with all variables and target.
+        forecast_df: dataframe with the last p observations.
+        last_vol: last volatility measuread in the p periods.
+        today_vol: last volatility from the dataframe.
     """
     # Get the data
     df1 = download_data(ticker1, start_date, end_date)
@@ -555,18 +585,19 @@ def create_vars(ticker1, start_date, end_date, p = 10):
     return df1, forecast_df, last_vol, today_vol
 
 def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10):
-    """Generates a simple report with main regression metrics: RMSE and MAE
+    """
+    Generates a simple report with main regression metrics: RMSE and MAE.
     
     Args:
-        model (regression model object): fitted regression model
-        x_train (DataFrame): dataframe with the training set
-        x_test (DataFrame): dataframe with the testing set
-        y_train (DataFrame): dataframe with the target variable from the training set
-        y_test (DataFrame): dataframe with the target variable from the testing set
-        stability (float): stability cut-off for the MAE
+        model (regression model object): fitted regression model.
+        x_train (DataFrame): dataframe with the training set.
+        x_test (DataFrame): dataframe with the testing set.
+        y_train (DataFrame): dataframe with the target variable from the training set.
+        y_test (DataFrame): dataframe with the target variable from the testing set.
+        stability (float): stability cut-off for the MAE.
         
     Returns:
-        Regression metrics report
+        Regression metrics report.
 
     """
 
@@ -589,20 +620,22 @@ def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10
         print("Model is not stable according to MAE")
 
 def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
-    """Generates a report with predicted value and actions to take for a given volatility model
+    """
+    Generates a report with predicted value and actions to take for a given volatility 
+    model.
     
     Args:
-        model (model object): fitted regression model
-        ticker1 (string): Yahoo Finance ticker
-        forecast_df (DataFrame): dataframe to forecast the volatility
-        last_vol (float): last predicted volatility
-        today_vol (float): today measured volatility
-        p (integer): period for the prediction
+        model (model object): fitted regression model.
+        ticker1 (string): Yahoo Finance ticker.
+        forecast_df (DataFrame): dataframe to forecast the volatility.
+        last_vol (float): last predicted volatility.
+        today_vol (float): today measured volatility.
+        p (integer): period for the prediction.
         
     Returns:
-        Regression metrics report
-
+        Regression metrics report.
     """
+
     print("-"*70)
     print("Last volatility measured before a prediction on the day " + str(forecast_df.index[0].strftime("%Y-%m-%d")))
     print("%.2f" % last_vol)
@@ -619,24 +652,26 @@ def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
     print("-"*70)
 
 def mad_calc(data, axis = None):
-    """Calculates the Mean Absolute Deviation - MAD
+    """
+    Calculates the Mean Absolute Deviation - MAD.
     
     Args:
-        data (list or data frame column): series for MAD's calculation
+        data (list or data frame column): series for MAD's calculation.
         
     Returns:
-        Mean Absolute Deviation
+        Mean Absolute Deviation.
     """
     return mean(absolute(data - mean(data, axis)), axis)
 
 def ifat(returns, p = 67):
-    """Calculates the iFat - Fata Tail Index for indentification of fat tails
+    """
+    Calculates the iFat - Fata Tail Index for indentification of fat tails.
     
     Args:
-        returns (data frame column): asset returns
+        returns (data frame column): asset returns.
         
     Returns:
-        The iFat and it's moving standard deviation(mstd)
+        The iFat and it's moving standard deviation(mstd).
     """
     p = p
     ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
