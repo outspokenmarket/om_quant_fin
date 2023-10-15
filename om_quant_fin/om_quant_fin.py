@@ -46,6 +46,19 @@ def simple_moving_average(data, window = 20):
     
     return data.rolling(window).mean()
 
+def moving_std(data, window = 20):
+    """
+    Method to calculate moving standard deviation from a series of values.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size (default 20).
+
+    Returns:
+        Series: Calculated moving standard deviation.
+    """
+    
+    return data.rolling(window).std()
 
 
 def rolling_z_score(data, window):
