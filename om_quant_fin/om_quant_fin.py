@@ -182,6 +182,32 @@ def rsi(data, window = 15):
 
     return df_rsi['rsi']
 
+def candle_proportions(open, high, low, close):
+    """
+    Method to calculate proportion of the candle's body and shadows.
+
+    Args:
+        open, high, low, close (Series): Input data from candle.
+    
+    Returns:
+        Series: Proportions of candle's body.
+        Series: Proportions of top shadow.
+        Series: Proportions of bottom shadow.
+    """
+    candle_size = high - low
+    
+    body_top = pd.Series(map(max, zip(open, close)))
+    body_top.index = close.index
+    top_shadow = (high - body_top)/candle_size
+
+    body_bottom = pd.Series(map(min, zip(open, close)))
+    body_bottom.index = close.index
+    bottom_shadow = (body_bottom - low)/candle_size
+
+    body = 1 - top_shadow - bottom_shadow
+    
+    return top_shadow, body, bottom_shadow
+
 def sequence_counter(data):
     """
     Method to count sequence of periods in the same direction.
