@@ -60,6 +60,19 @@ def moving_std(data, window = 20):
     
     return data.rolling(window).std()
 
+def moving_median(value_series, periods = 20):
+    """
+    Method to calculate moving median from a series of values.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size (default 20).
+
+    Returns:
+        Series: Calculated moving standard median.
+    """
+    
+    return value_series.rolling(periods).median()
 
 def rolling_z_score(data, window):
     """
