@@ -32,9 +32,25 @@ def download_data(ticker, start_date, end_date):
     stock_data = yf.download(ticker, start = start_date, end = end_date)
     return stock_data
 
+def simple_moving_average(data, window = 20):
+    """
+    Method to calculate SMA (Simple Moving Average) from a series of values.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size (default 20).
+
+    Returns:
+        Series: Calculated moving average.
+    """
+    
+    return data.rolling(window).mean()
+
+
 
 def rolling_z_score(data, window):
-    """Calculate the rolling Z-score.
+    """
+    Calculate the rolling Z-score.
     
     Args:
         data (Series): Input data.
@@ -43,7 +59,9 @@ def rolling_z_score(data, window):
     Returns:
         Series: Rolling Z-score.
     """
-    mean = data.rolling(window = window).mean()
+    mean = simple_moving_average(data, window)
+
+    
     std_dev = data.rolling(window = window).std()
     z_score = (data - mean) / std_dev
     return z_score
@@ -570,5 +588,3 @@ def ifat(returns, p = 67):
     ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
     mstd = ifat.rolling(20).mean() - ifat.rolling(252*2).std()
     return ifat, mstd
-
-#
