@@ -278,8 +278,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
         , autosize = False
         , width = 800
         , height = 600
-        , legend = dict( x = 0.8, y = 0.0
-                        , bgcolor = "rgba(255, 255, 255, 0)"
+        , legend = dict(x = 0.8, 
+                        y = 0.0, 
+                        bgcolor = "rgba(255, 255, 255, 0)", 
                         bordercolor = "rgba(255, 255, 255, 0)"
                         )
         , template = "plotly_white")
