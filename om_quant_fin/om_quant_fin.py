@@ -131,7 +131,7 @@ def rolling_median_z_score(data, window):
 
 def rolling_ratio(data, window):
     """
-    Calculate the rolling ratio of data and its mean.
+    Calculate the rolling ratio of data and its mean (RSL).
     
     Args:
         data (Series): Input data.
@@ -140,9 +140,9 @@ def rolling_ratio(data, window):
     Returns:
         Series: Rolling ratio.
     """
-    mean = data.rolling(window = window).mean()
-    ratio = np.round((data / mean - 1), 3)*100
-    return ratio
+    sma = simple_moving_average(data, window)
+
+    return np.round((data / sma - 1), 3)*100
 
 def sequence_counter(data):
     """
