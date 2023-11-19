@@ -13,6 +13,9 @@ from statsmodels.tsa.stattools import pacf, acf
 from numpy_ext import rolling_apply as rolling_apply_ext
 from datetime import datetime, timedelta  
 from time import sleep
+import requests
+import time
+import math
 import sys
 import warnings
 warnings.filterwarnings("ignore")
@@ -31,6 +34,80 @@ def download_data(ticker, start_date, end_date):
     """
     stock_data = yf.download(ticker, start = start_date, end = end_date)
     return stock_data
+
+def get_bitstamp_data(currency_pair: str, start: str) -> pd.DataFrame:
+    
+    """Retrieve historical OHLC (Open, High, Low, Close) price and volume data from the Bitstamp API for a specified currency pair and start date.
+
+    Args:
+        currency_pair (str): The pair of currencies to get data for. This should be in the format 'basequote', for example 'btcusd' for Bitcoin to US Dollar.
+        start (str): The date to start collecting data from. This should be in the format 'dd-mm-yyyy'.
+    
+    Returns:
+        DataFrame: A pandas DataFrame containing the date, open price, high price, low price, close price and volume for each period. The data is ordered from oldest to newest.
+    
+    Raises:
+        ValueError: If the 'start' parameter is not in the correct format.
+        HTTPError: If there was a problem making the API request.
+    
+    Notes:
+        - The API has a limit of 1000 data points per request. If the date range specified by the 'start' parameter to the current date includes more than 1000 data points, multiple requests will be made.
+        - The Bitstamp API returns data in the form of Unix timestamps, which are converted into human-readable dates.
+    
+    Usage:
+        data = get_bitstamp_data(currency_pair="btcusd", start="01-01-2011")
+        data
+    """
+    
+    # Convert start date to timestamp because bitstamp API uses UNIX timestamp
+    start_date = datetime.strptime(start, "%d-%m-%Y")
+    start_timestamp = int(start_date.timestamp())
+    days = (datetime.now() - start_date).days
+    num_requests = math.ceil(days * (86400 / (24*60*60)) / 1000)
+
+    # Initialize an empty list to store all the data
+    data_list = []
+    current_start = start_timestamp
+
+    for _ in range(num_requests):
+        
+        # Make the API request to get the data
+        url = f"https://www.bitstamp.net/api/v2/ohlc/{currency_pair}/?start={current_start}&step={86400}&limit={1000}"
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            
+            data = response.json()
+            
+            if 'data' in data and 'ohlc' in data['data']:
+                
+                ohlc_data = data['data']['ohlc']
+                df = pd.DataFrame(ohlc_data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
+
+                # Append the data to the list
+                data_list.append(df)
+
+                # Update current_start for the next request
+                current_start = str(int(df['timestamp'].iloc[-1].timestamp()))
+            else:
+                print("Error: Invalid data format received. Use the dd-mm-aaaa format")
+                return None
+        else:
+            print(f"Error occurred while making the API request. Status Code: {response.status_code}")
+            return None
+
+    df_all = pd.concat(data_list, ignore_index=True)
+
+    df_all.rename({"timestamp":"date"}, axis = 1, inplace = True)
+
+    df_all["open"] = df_all["open"].astype(float)
+    df_all["high"] = df_all["high"].astype(float)
+    df_all["low"] = df_all["low"].astype(float)
+    df_all["close"] = df_all["close"].astype(float)
+    df_all["volume"] = df_all["volume"].astype(float)
+
+    return df_all
 
 
 def rolling_z_score(data, window):
