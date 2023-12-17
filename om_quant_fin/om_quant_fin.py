@@ -156,7 +156,8 @@ def calculate_returns(data, period = 1):
 
 
 def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
-    """Calculate and plot the AUC for given true labels and predictions.
+    """
+    Calculate and plot the AUC for given true labels and predictions.
     
     Args:
         y_true (Series): True labels.
@@ -180,8 +181,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
         , autosize = False
         , width = 800
         , height = 600
-        , legend = dict( x = 0.8, y = 0.0
-                        , bgcolor = "rgba(255, 255, 255, 0)"
+        , legend = dict(x = 0.8, 
+                        y = 0.0, 
+                        bgcolor = "rgba(255, 255, 255, 0)", 
                         bordercolor = "rgba(255, 255, 255, 0)"
                         )
         , template = "plotly_white")
@@ -647,3 +649,4 @@ def ifat(returns, p = 67):
     ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
     mstd = ifat.rolling(20).mean() - ifat.rolling(252*2).std()
     return ifat, mstd
+
