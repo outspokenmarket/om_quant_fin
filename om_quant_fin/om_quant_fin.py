@@ -20,9 +20,57 @@ import sys
 import warnings
 warnings.filterwarnings("ignore")
 
+def simple_moving_average(data, window):
+    """
+    Method to calculate SMA (Simple Moving Average) from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving average.
+    """
+    
+    return data.rolling(window).mean()
+
+def moving_std(data, window):
+    """
+    Method to calculate moving standard deviation from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving standard deviation.
+    """
+    
+    return data.rolling(window).std()
+
+def moving_median(data, window):
+    """
+    Method to calculate moving median from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving standard median.
+    """
+    
+    return data.rolling(window).median()
 
 def download_data(ticker, start_date, end_date):
-    """Download stock data from Yahoo Finance.
+    """
+    Download stock data from Yahoo Finance.
     
     Args:
         ticker (str): Stock symbol.
@@ -109,9 +157,11 @@ def get_bitstamp_data(currency_pair: str, start: str) -> pd.DataFrame:
 
     return df_all
 
-
 def rolling_z_score(data, window):
-    """Calculate the rolling Z-score.
+    """
+    Calculate the rolling Z-score.
+    
+    The Series must be ordered from oldest date to newest date.
     
     Args:
         data (Series): Input data.
@@ -120,10 +170,16 @@ def rolling_z_score(data, window):
     Returns:
         Series: Rolling Z-score.
     """
-    mean = data.rolling(window = window).mean()
-    std_dev = data.rolling(window = window).std()
-    z_score = (data - mean) / std_dev
-    return z_score
+
+    sma = simple_moving_average(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_sma = data - sma
+
+    return distance_price_sma / moving_std_dev
 
 
 def rolling_ratio(data, window):
