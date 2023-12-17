@@ -181,6 +181,29 @@ def rolling_z_score(data, window):
 
     return distance_price_sma / moving_std_dev
 
+def rolling_median_z_score(data, window):
+    """
+    Calculate the rolling median Z-score.
+    
+    The Series must be ordered from oldest date to newest date.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Rolling median Z-score.
+    """
+    
+    mm = moving_median(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_mm = data - mm
+
+    return distance_price_mm / moving_std_dev
 
 def rolling_ratio(data, window):
     """Calculate the rolling ratio of data and its mean.
