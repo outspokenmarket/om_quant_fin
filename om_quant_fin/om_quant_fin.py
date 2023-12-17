@@ -220,6 +220,45 @@ def rolling_ratio(data, window):
 
     return np.round((data / sma - 1), 3)*100
 
+def rsi(data, window = 15):
+    """
+    Calculate RSI indicator.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+    
+    Returns:
+        Series: RSI.
+    """
+    df_rsi = pd.DataFrame(data = {'close':data})
+
+    # Establish gains and losses for each day
+    df_rsi['variation'] = df_rsi.diff()
+    df_rsi = df_rsi[1:]
+    df_rsi['gain'] = np.where(df_rsi['variation'] > 0, df_rsi['variation'], 0)
+    df_rsi['loss'] = np.where(df_rsi['variation'] < 0, df_rsi['variation'], 0)
+
+    # Calculate simple averages so we can initialize the classic averages
+    df_rsi['avg_gain'] = df_rsi['gain'].rolling(window).mean()
+    df_rsi['avg_loss'] = df_rsi['loss'].abs().rolling(window).mean()
+
+    for i in range(window, len(df_rsi['avg_gain'])):
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i - 1] * (window - 1)
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i] + df_rsi['gain'][i]
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i]/window
+        
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i - 1] * (window - 1) 
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i] + df_rsi['loss'].abs()[i]
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i]/ window
+
+    # Calculate the RSI
+    df_rsi['rs'] = df_rsi['avg_gain'] / df_rsi['avg_loss']
+    df_rsi['rsi'] = 100 - (100 / (1 + df_rsi['rs']))
+
+    return df_rsi['rsi']
+
+
 
 def calculate_returns(data, period = 1):
     """Calculate returns from price data.
