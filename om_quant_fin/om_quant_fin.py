@@ -284,6 +284,36 @@ def candle_proportions(open, high, low, close):
     
     return top_shadow, body, bottom_shadow
 
+def sequence_counter(data):
+    """
+    Method to count sequence of periods in the same direction.
+
+    Args:
+        data (Series): Input data.
+    
+    Returns:
+        Series: Sequence count on same direction.
+    """
+
+    shifted_data = data.shift(1)
+    
+    high_or_low = data - shifted_data
+    
+    high_or_low[high_or_low > 0] = 1
+    high_or_low[high_or_low < 0] = -1
+    high_or_low[high_or_low == 0] = 0
+
+    shifted_values_directions = high_or_low.shift(1)
+    # Comparing if has direction change
+    has_direction_change = high_or_low.ne(shifted_values_directions)
+    # Calculate cumsum of direction change to obtain the references for groupby
+    group_references = has_direction_change.cumsum()
+    # Group by positions where have direction change
+    grouped_values = high_or_low.groupby(group_references)
+
+    # Cumulative count to calculate each sequence (starting by 1)
+    return (grouped_values.cumcount())+1
+
 def calculate_returns(data, period = 1):
     """Calculate returns from price data.
     
