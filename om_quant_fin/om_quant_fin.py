@@ -315,7 +315,8 @@ def sequence_counter(data):
     return (grouped_values.cumcount())+1
 
 def calculate_returns(data, period = 1):
-    """Calculate returns from price data.
+    """
+    Calculate returns from price data.
     
     Args:
         data (Series): Input price data.
@@ -326,7 +327,6 @@ def calculate_returns(data, period = 1):
     """
     returns = data.pct_change(period)
     return returns
-
 
 def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
     """
@@ -365,9 +365,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
     
     return roc_auc
 
-
 def calculate_gini(auc_score):
-    """Calculate the Gini coefficient based on the AUC.
+    """
+    Calculate the Gini coefficient based on the AUC.
     
     Args:
         auc_score (float): AUC value.
@@ -378,9 +378,9 @@ def calculate_gini(auc_score):
     gini = 2 * auc_score - 1
     return gini
 
-
 def pain_index(prices_series, freq = 252):
-    """Calculate the Pain Index for a given price series
+    """
+    Calculate the Pain Index for a given price series
     
     Args:
         prices_series (float): Price series
@@ -409,9 +409,9 @@ def pain_index(prices_series, freq = 252):
 
     return pain_index
 
-
 def plot_pain_index(ticker, index, close, pain_index):
-    """Plot the Pain Index and the price series for the given tickers
+    """
+    Plot the Pain Index and the price series for the given tickers
     
     Args:
         ticker (string): Ticker symbol from Yahoo finance
@@ -463,9 +463,9 @@ def plot_pain_index(ticker, index, close, pain_index):
     )
     return fig.show()
 
-
 def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range_bs = 0.1):
-    """Calculates a bootstrapping simulation for model accuracy
+    """
+    Calculates a bootstrapping simulation for model accuracy
     
     Args:
         model (model object): configured classification model
@@ -535,9 +535,9 @@ def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range
     
     return accuracy_df
 
-
 def plot_bs(metric_bs):
-    """Plot the distribution of accuracies from the bootstrapping simulation
+    """
+    Plot the distribution of accuracies from the bootstrapping simulation
     
     Args:
         metric_bs (DataFrame): data frame from the model_bs function
@@ -553,9 +553,9 @@ def plot_bs(metric_bs):
         )
     fig.show()
 
-
 class QCutTransformer(BaseEstimator, TransformerMixin):
-    """QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
+    """
+    QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
     This transformer performs quantile-based discretization on the input data.
     The constructor function initializes the transformer with the number of quantiles (default is 10)
     and optional labels for the bins.
@@ -608,7 +608,8 @@ class QCutTransformer(BaseEstimator, TransformerMixin):
         return pd.cut(X, bins = extended_bins, labels = extended_labels, include_lowest = True, duplicates = "drop")
 
 def get_acf1(x):
-    """Gets the first ACF component for a given time series
+    """
+    Gets the first ACF component for a given time series
         
         Args:
             x (DataFrame column): time series
@@ -619,25 +620,27 @@ def get_acf1(x):
     return acf(x, alpha = 0.05, nlags = 5)[0][1]
 
 def z_score(x):
-    """Calculates a traditional normalization with z-score
+    """
+    Calculates a traditional normalization with z-score.
+    
+    Args:
+        x (DataFrame column): time series.
         
-        Args:
-            x (DataFrame column): time series
-            
-        Returns:
-            Normalized z-score serie
-        """
+    Returns:
+        Normalized z-score serie.
+    """
     return ((x - x.mean())/np.std(x))[-1]
 
 def next_business_day(date):
-    """Given a a date, it returns the next business day
+    """
+    Given a a date, it returns the next business day.
         
-        Args:
-            date (string): date in the string format
-            
-        Returns:
-            Next business day
-        """
+    Args:
+        date (string): date in the string format.
+        
+    Returns:
+        Next business day.
+    """
     if isinstance(date, str):
         date = pd.to_datetime(date)
     business_days = pd.date_range(start=date, end=date + pd.DateOffset(weeks=1), freq = "B")
@@ -645,7 +648,8 @@ def next_business_day(date):
     return business_days.min()
 
 def z_score_med(x):
-    """Calculate the  z-score with a median
+    """
+    Calculate the  z-score with a median
     
     Args:
         data (Series): Input data.
@@ -656,7 +660,8 @@ def z_score_med(x):
     return ((x - x.median())/np.std(x))[-1]
 
 def create_vars(ticker1, start_date, end_date, p = 10):
-    """Creates a dataframe with a generic set of variables for volatility forecasting
+    """
+    Creates a dataframe with a generic set of variables for volatility forecasting
     
     Args:
         ticker1 (string): ticker name from Yahoo Finance
@@ -735,7 +740,8 @@ def create_vars(ticker1, start_date, end_date, p = 10):
     return df1, forecast_df, last_vol, today_vol
 
 def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10):
-    """Generates a simple report with main regression metrics: RMSE and MAE
+    """
+    Generates a simple report with main regression metrics: RMSE and MAE
     
     Args:
         model (regression model object): fitted regression model
@@ -769,7 +775,8 @@ def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10
         print("Model is not stable according to MAE")
 
 def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
-    """Generates a report with predicted value and actions to take for a given volatility model
+    """
+    Generates a report with predicted value and actions to take for a given volatility model
     
     Args:
         model (model object): fitted regression model
@@ -799,7 +806,8 @@ def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
     print("-"*70)
 
 def mad_calc(data, axis = None):
-    """Calculates the Mean Absolute Deviation - MAD
+    """
+    Calculates the Mean Absolute Deviation - MAD
     
     Args:
         data (list or data frame column): series for MAD's calculation
@@ -810,7 +818,8 @@ def mad_calc(data, axis = None):
     return mean(absolute(data - mean(data, axis)), axis)
 
 def ifat(returns, p = 67):
-    """Calculates the iFat - Fata Tail Index for indentification of fat tails
+    """
+    Calculates the iFat - Fata Tail Index for indentification of fat tails
     
     Args:
         returns (data frame column): asset returns
@@ -822,4 +831,3 @@ def ifat(returns, p = 67):
     ifat = returns.rolling(p).apply(mad_calc)/returns.rolling(p).std()
     mstd = ifat.rolling(20).mean() - ifat.rolling(252*2).std()
     return ifat, mstd
-
