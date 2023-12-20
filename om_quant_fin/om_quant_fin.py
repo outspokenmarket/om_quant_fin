@@ -20,9 +20,57 @@ import sys
 import warnings
 warnings.filterwarnings("ignore")
 
+def simple_moving_average(data, window):
+    """
+    Method to calculate SMA (Simple Moving Average) from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving average.
+    """
+    
+    return data.rolling(window).mean()
+
+def moving_std(data, window):
+    """
+    Method to calculate moving standard deviation from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving standard deviation.
+    """
+    
+    return data.rolling(window).std()
+
+def moving_median(data, window):
+    """
+    Method to calculate moving median from a series of values.
+    
+    The Series must be ordered from oldest date to newest date.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Calculated moving standard median.
+    """
+    
+    return data.rolling(window).median()
 
 def download_data(ticker, start_date, end_date):
-    """Download stock data from Yahoo Finance.
+    """
+    Download stock data from Yahoo Finance.
     
     Args:
         ticker (str): Stock symbol.
@@ -109,9 +157,11 @@ def get_bitstamp_data(currency_pair: str, start: str) -> pd.DataFrame:
 
     return df_all
 
-
 def rolling_z_score(data, window):
-    """Calculate the rolling Z-score.
+    """
+    Calculate the rolling Z-score.
+    
+    The Series must be ordered from oldest date to newest date.
     
     Args:
         data (Series): Input data.
@@ -120,14 +170,44 @@ def rolling_z_score(data, window):
     Returns:
         Series: Rolling Z-score.
     """
-    mean = data.rolling(window = window).mean()
-    std_dev = data.rolling(window = window).std()
-    z_score = (data - mean) / std_dev
-    return z_score
 
+    sma = simple_moving_average(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_sma = data - sma
+
+    return distance_price_sma / moving_std_dev
+
+def rolling_median_z_score(data, window):
+    """
+    Calculate the rolling median Z-score.
+    
+    The Series must be ordered from oldest date to newest date.
+    
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+
+    Returns:
+        Series: Rolling median Z-score.
+    """
+    
+    mm = moving_median(data, window)
+
+    # Calculating the moving standard deviation
+    moving_std_dev = moving_std(data, window)
+
+    # Calculating distance between price and the MA
+    distance_price_mm = data - mm
+
+    return distance_price_mm / moving_std_dev
 
 def rolling_ratio(data, window):
-    """Calculate the rolling ratio of data and its mean.
+    """
+    Calculate the rolling ratio of data and its mean (RSL).
     
     Args:
         data (Series): Input data.
@@ -136,13 +216,107 @@ def rolling_ratio(data, window):
     Returns:
         Series: Rolling ratio.
     """
-    mean = data.rolling(window = window).mean()
-    ratio = np.round((data / mean - 1), 3)*100
-    return ratio
+    sma = simple_moving_average(data, window)
 
+    return np.round((data / sma - 1), 3)*100
+
+def rsi(data, window = 15):
+    """
+    Calculate RSI indicator.
+
+    Args:
+        data (Series): Input data.
+        window (int): Rolling window size.
+    
+    Returns:
+        Series: RSI.
+    """
+    df_rsi = pd.DataFrame(data = {'close':data})
+
+    # Establish gains and losses for each day
+    df_rsi['variation'] = df_rsi.diff()
+    df_rsi = df_rsi[1:]
+    df_rsi['gain'] = np.where(df_rsi['variation'] > 0, df_rsi['variation'], 0)
+    df_rsi['loss'] = np.where(df_rsi['variation'] < 0, df_rsi['variation'], 0)
+
+    # Calculate simple averages so we can initialize the classic averages
+    df_rsi['avg_gain'] = df_rsi['gain'].rolling(window).mean()
+    df_rsi['avg_loss'] = df_rsi['loss'].abs().rolling(window).mean()
+
+    for i in range(window, len(df_rsi['avg_gain'])):
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i - 1] * (window - 1)
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i] + df_rsi['gain'][i]
+        df_rsi['avg_gain'][i] = df_rsi['avg_gain'][i]/window
+        
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i - 1] * (window - 1) 
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i] + df_rsi['loss'].abs()[i]
+        df_rsi['avg_loss'][i] = df_rsi['avg_loss'][i]/ window
+
+    # Calculate the RSI
+    df_rsi['rs'] = df_rsi['avg_gain'] / df_rsi['avg_loss']
+    df_rsi['rsi'] = 100 - (100 / (1 + df_rsi['rs']))
+
+    return df_rsi['rsi']
+
+def candle_proportions(open, high, low, close):
+    """
+    Method to calculate proportion of the candle's body and shadows.
+
+    Args:
+        open, high, low, close (Series): Input data from candle.
+    
+    Returns:
+        Series: Proportions of candle's body.
+        Series: Proportions of top shadow.
+        Series: Proportions of bottom shadow.
+    """
+    candle_size = high - low
+    
+    body_top = pd.Series(map(max, zip(open, close)))
+    body_top.index = close.index
+    top_shadow = (high - body_top)/candle_size
+
+    body_bottom = pd.Series(map(min, zip(open, close)))
+    body_bottom.index = close.index
+    bottom_shadow = (body_bottom - low)/candle_size
+
+    body = 1 - top_shadow - bottom_shadow
+    
+    return top_shadow, body, bottom_shadow
+
+def sequence_counter(data):
+    """
+    Method to count sequence of periods in the same direction.
+
+    Args:
+        data (Series): Input data.
+    
+    Returns:
+        Series: Sequence count on same direction.
+    """
+
+    shifted_data = data.shift(1)
+    
+    high_or_low = data - shifted_data
+    
+    high_or_low[high_or_low > 0] = 1
+    high_or_low[high_or_low < 0] = -1
+    high_or_low[high_or_low == 0] = 0
+
+    shifted_values_directions = high_or_low.shift(1)
+    # Comparing if has direction change
+    has_direction_change = high_or_low.ne(shifted_values_directions)
+    # Calculate cumsum of direction change to obtain the references for groupby
+    group_references = has_direction_change.cumsum()
+    # Group by positions where have direction change
+    grouped_values = high_or_low.groupby(group_references)
+
+    # Cumulative count to calculate each sequence (starting by 1)
+    return (grouped_values.cumcount())+1
 
 def calculate_returns(data, period = 1):
-    """Calculate returns from price data.
+    """
+    Calculate returns from price data.
     
     Args:
         data (Series): Input price data.
@@ -154,9 +328,9 @@ def calculate_returns(data, period = 1):
     returns = data.pct_change(period)
     return returns
 
-
 def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
-    """Calculate and plot the AUC for given true labels and predictions.
+    """
+    Calculate and plot the AUC for given true labels and predictions.
     
     Args:
         y_true (Series): True labels.
@@ -180,8 +354,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
         , autosize = False
         , width = 800
         , height = 600
-        , legend = dict( x = 0.8, y = 0.0
-                        , bgcolor = "rgba(255, 255, 255, 0)"
+        , legend = dict(x = 0.8, 
+                        y = 0.0, 
+                        bgcolor = "rgba(255, 255, 255, 0)", 
                         bordercolor = "rgba(255, 255, 255, 0)"
                         )
         , template = "plotly_white")
@@ -190,9 +365,9 @@ def calculate_plot_auc(y_true, y_pred, dataset_type = "Unknown"):
     
     return roc_auc
 
-
 def calculate_gini(auc_score):
-    """Calculate the Gini coefficient based on the AUC.
+    """
+    Calculate the Gini coefficient based on the AUC.
     
     Args:
         auc_score (float): AUC value.
@@ -203,9 +378,9 @@ def calculate_gini(auc_score):
     gini = 2 * auc_score - 1
     return gini
 
-
 def pain_index(prices_series, freq = 252):
-    """Calculate the Pain Index for a given price series
+    """
+    Calculate the Pain Index for a given price series
     
     Args:
         prices_series (float): Price series
@@ -234,9 +409,9 @@ def pain_index(prices_series, freq = 252):
 
     return pain_index
 
-
 def plot_pain_index(ticker, index, close, pain_index):
-    """Plot the Pain Index and the price series for the given tickers
+    """
+    Plot the Pain Index and the price series for the given tickers
     
     Args:
         ticker (string): Ticker symbol from Yahoo finance
@@ -288,9 +463,9 @@ def plot_pain_index(ticker, index, close, pain_index):
     )
     return fig.show()
 
-
 def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range_bs = 0.1):
-    """Calculates a bootstrapping simulation for model accuracy
+    """
+    Calculates a bootstrapping simulation for model accuracy
     
     Args:
         model (model object): configured classification model
@@ -360,9 +535,9 @@ def model_bs(model, X_train, y_train, X_test, y_test, n_iterations = 1000, range
     
     return accuracy_df
 
-
 def plot_bs(metric_bs):
-    """Plot the distribution of accuracies from the bootstrapping simulation
+    """
+    Plot the distribution of accuracies from the bootstrapping simulation
     
     Args:
         metric_bs (DataFrame): data frame from the model_bs function
@@ -378,9 +553,9 @@ def plot_bs(metric_bs):
         )
     fig.show()
 
-
 class QCutTransformer(BaseEstimator, TransformerMixin):
-    """QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
+    """
+    QCutTransformer is a custom transformer class that extends the BaseEstimator and TransformerMixin classes from sklearn.
     This transformer performs quantile-based discretization on the input data.
     The constructor function initializes the transformer with the number of quantiles (default is 10)
     and optional labels for the bins.
@@ -433,7 +608,8 @@ class QCutTransformer(BaseEstimator, TransformerMixin):
         return pd.cut(X, bins = extended_bins, labels = extended_labels, include_lowest = True, duplicates = "drop")
 
 def get_acf1(x):
-    """Gets the first ACF component for a given time series
+    """
+    Gets the first ACF component for a given time series
         
         Args:
             x (DataFrame column): time series
@@ -444,25 +620,27 @@ def get_acf1(x):
     return acf(x, alpha = 0.05, nlags = 5)[0][1]
 
 def z_score(x):
-    """Calculates a traditional normalization with z-score
+    """
+    Calculates a traditional normalization with z-score.
+    
+    Args:
+        x (DataFrame column): time series.
         
-        Args:
-            x (DataFrame column): time series
-            
-        Returns:
-            Normalized z-score serie
-        """
+    Returns:
+        Normalized z-score serie.
+    """
     return ((x - x.mean())/np.std(x))[-1]
 
 def next_business_day(date):
-    """Given a a date, it returns the next business day
+    """
+    Given a a date, it returns the next business day.
         
-        Args:
-            date (string): date in the string format
-            
-        Returns:
-            Next business day
-        """
+    Args:
+        date (string): date in the string format.
+        
+    Returns:
+        Next business day.
+    """
     if isinstance(date, str):
         date = pd.to_datetime(date)
     business_days = pd.date_range(start=date, end=date + pd.DateOffset(weeks=1), freq = "B")
@@ -470,7 +648,8 @@ def next_business_day(date):
     return business_days.min()
 
 def z_score_med(x):
-    """Calculate the  z-score with a median
+    """
+    Calculate the  z-score with a median
     
     Args:
         data (Series): Input data.
@@ -481,7 +660,8 @@ def z_score_med(x):
     return ((x - x.median())/np.std(x))[-1]
 
 def create_vars(ticker1, start_date, end_date, p = 10):
-    """Creates a dataframe with a generic set of variables for volatility forecasting
+    """
+    Creates a dataframe with a generic set of variables for volatility forecasting
     
     Args:
         ticker1 (string): ticker name from Yahoo Finance
@@ -560,7 +740,8 @@ def create_vars(ticker1, start_date, end_date, p = 10):
     return df1, forecast_df, last_vol, today_vol
 
 def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10):
-    """Generates a simple report with main regression metrics: RMSE and MAE
+    """
+    Generates a simple report with main regression metrics: RMSE and MAE
     
     Args:
         model (regression model object): fitted regression model
@@ -594,7 +775,8 @@ def regression_metrics(model, x_train, x_test, y_train, y_test, stability = 0.10
         print("Model is not stable according to MAE")
 
 def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
-    """Generates a report with predicted value and actions to take for a given volatility model
+    """
+    Generates a report with predicted value and actions to take for a given volatility model
     
     Args:
         model (model object): fitted regression model
@@ -624,7 +806,8 @@ def prediction_report(model, ticker1, forecast_df, last_vol, today_vol, p):
     print("-"*70)
 
 def mad_calc(data, axis = None):
-    """Calculates the Mean Absolute Deviation - MAD
+    """
+    Calculates the Mean Absolute Deviation - MAD
     
     Args:
         data (list or data frame column): series for MAD's calculation
@@ -635,7 +818,8 @@ def mad_calc(data, axis = None):
     return mean(absolute(data - mean(data, axis)), axis)
 
 def ifat(returns, p = 67):
-    """Calculates the iFat - Fata Tail Index for indentification of fat tails
+    """
+    Calculates the iFat - Fata Tail Index for indentification of fat tails
     
     Args:
         returns (data frame column): asset returns
