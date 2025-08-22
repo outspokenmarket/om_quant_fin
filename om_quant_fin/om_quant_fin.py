@@ -32,7 +32,7 @@ def download_data(ticker, start_date, end_date):
     Returns:
         DataFrame: Stock data.
     """
-    stock_data = yf.download(ticker, start = start_date, end = end_date)
+    stock_data = yf.download(ticker, start = start_date, end = end_date, multi_level_index=False)
     return stock_data
 
 def get_bitstamp_data(currency_pair: str, start: str) -> pd.DataFrame:
